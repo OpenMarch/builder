@@ -27,8 +27,6 @@ const getPlatform = () => {
 	switch (process.platform) {
 		case "darwin":
 			return "mac";
-		case "win32":
-			return "windows";
 		default:
 			return "linux";
 	}
@@ -72,7 +70,6 @@ const runAction = () => {
 	const useVueCli = getInput("use_vue_cli") === "true";
 	const args = getInput("args") || "";
 	const maxAttempts = Number(getInput("max_attempts") || "1");
-	const skipWindowsNpmInstall = getInput("skip_windows_npm_install") === "true";
 
 	// TODO: Deprecated option, remove in v2.0. `electron-builder` always requires a `package.json` in
 	// the same directory as the Electron app, so the `package_root` option should be used instead
@@ -114,20 +111,32 @@ const runAction = () => {
 	}
 
 	// Run NPM build script if it exists
-	if (skipBuild) {
-		log("Skipping build script because `skip_build` option is set");
+	log("Running the build script…");
+	if (useNpm) {
+		run(`npm run ${buildScriptName} --if-present`, pkgRoot);
 	} else {
-		log("Running the build script…");
-		if (useNpm) {
-			run(`npm run ${buildScriptName} --if-present`, pkgRoot);
-		} else {
-			// TODO: Use `yarn run ${buildScriptName} --if-present` once supported
-			// https://github.com/yarnpkg/yarn/issues/6894
-			const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
-			if (pkgJson.scripts && pkgJson.scripts[buildScriptName]) {
-				run(`yarn run ${buildScriptName}`, pkgRoot);
-			}
+		// TODO: Use `yarn run ${buildScriptName} --if-present` once supported
+		// https://github.com/yarnpkg/yarn/issues/6894
+		const pkgJson = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
+		if (pkgJson.scripts && pkgJson.scripts[buildScriptName]) {
+			run(`yarn run ${buildScriptName}`, pkgRoot);
 		}
+	}
+
+	if (platform === "linux") {
+		log("Installing wine to build Windows app on Linux…");
+		run("sudo dpkg --add-architecture i386")
+		run("sudo apt-get update")
+		run("sudo apt-get install -y software-properties-common")
+		run("sudo add-apt-repository -y ppa:cybermax-dexter/sdl2-backport")
+		run("sudo apt-get update")
+		run(`sudo apt-get install -y \
+			wine32 \
+			winbind \
+			xvfb`)
+        // Verify Wine installation
+		log("Verifying Wine installation…");
+		run("wine --version")
 	}
 
 	log(`Building${release ? " and releasing" : ""} the Electron app…`);
@@ -135,7 +144,7 @@ const runAction = () => {
 	for (let i = 0; i < maxAttempts; i += 1) {
 		try {
 			run(
-				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} --${platform} ${
+				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} -${platform === "mac" ? "m" : "wl"} ${
 					release ? "--publish always" : ""
 				} ${args}`,
 				appRoot,

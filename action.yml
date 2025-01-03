@@ -46,10 +46,6 @@ inputs:
     description: Maximum number of attempts for completing the build and release step
     required: false
     default: "1"
-  skip_windows_npm_install:
-    description: Whether to skip installing NPM dependencies on Windows
-    required: false
-    default: "false"
 
   # Deprecated
   app_root:
