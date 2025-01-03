@@ -15,7 +15,7 @@ inputs:
   release:
     description: Whether the app should be released after a successful build
     required: false
-    default: false
+    default: "false"
   windows_certs:
     description: Base64-encoded code signing certificate for Windows
     required: false
@@ -33,11 +33,11 @@ inputs:
   skip_build:
     description: Whether the action should execute the NPM build script before running `electron-builder`
     required: false
-    default: false
+    default: "false"
   use_vue_cli:
     description: Whether to run `electron-builder` using the Vue CLI plugin instead of calling the command directly
     required: false
-    default: false
+    default: "false"
   args:
     description: Other arguments to pass to the `electron-builder` command, e.g. configuration overrides
     required: false
@@ -46,6 +46,10 @@ inputs:
     description: Maximum number of attempts for completing the build and release step
     required: false
     default: "1"
+  skip_windows_npm_install:
+    description: Whether to skip installing NPM dependencies on Windows
+    required: false
+    default: "false"
 
   # Deprecated
   app_root:

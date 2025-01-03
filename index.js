@@ -72,6 +72,7 @@ const runAction = () => {
 	const useVueCli = getInput("use_vue_cli") === "true";
 	const args = getInput("args") || "";
 	const maxAttempts = Number(getInput("max_attempts") || "1");
+	const skipWindowsNpmInstall = getInput("skip_windows_npm_install") === "true";
 
 	// TODO: Deprecated option, remove in v2.0. `electron-builder` always requires a `package.json` in
 	// the same directory as the Electron app, so the `package_root` option should be used instead
@@ -105,8 +106,12 @@ const runAction = () => {
 	// Disable console advertisements during install phase
 	setEnv("ADBLOCK", true);
 
-	log(`Installing dependencies using ${useNpm ? "NPM" : "Yarn"}…`);
-	run(useNpm ? "npm install" : "yarn", pkgRoot);
+	if (platform === "windows" && skipWindowsNpmInstall) {
+		log("Skipping NPM install because `skip_windows_npm_install` option is set");
+	} else {
+		log(`Installing dependencies using ${useNpm ? "NPM" : "Yarn"}…`);
+		run(useNpm ? "npm install" : "yarn", pkgRoot);
+	}
 
 	// Run NPM build script if it exists
 	if (skipBuild) {
