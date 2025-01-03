@@ -123,21 +123,21 @@ const runAction = () => {
 		}
 	}
 
-	if (platform === "linux") {
-		log("Installing wine to build Windows app on Linux…");
-		run("sudo dpkg --add-architecture i386")
-		run("sudo apt-get update")
-		run("sudo apt-get install -y software-properties-common")
-		run("sudo add-apt-repository -y ppa:cybermax-dexter/sdl2-backport")
-		run("sudo apt-get update")
-		run(`sudo apt-get install -y \
-			wine32 \
-			winbind \
-			xvfb`)
-        // Verify Wine installation
-		log("Verifying Wine installation…");
-		run("wine --version")
-	}
+	// if (platform === "linux") {
+	// 	log("Installing wine to build Windows app on Linux…");
+	// 	run("sudo dpkg --add-architecture i386")
+	// 	run("sudo apt-get update")
+	// 	run("sudo apt-get install -y software-properties-common")
+	// 	run("sudo add-apt-repository -y ppa:cybermax-dexter/sdl2-backport")
+	// 	run("sudo apt-get update")
+	// 	run(`sudo apt-get install -y \
+	// 		wine32 \
+	// 		winbind \
+	// 		xvfb`)
+    //     // Verify Wine installation
+	// 	log("Verifying Wine installation…");
+	// 	run("wine --version")
+	// }
 
 	log(`Building${release ? " and releasing" : ""} the Electron app…`);
 	const cmd = useVueCli ? "vue-cli-service electron:build" : "electron-builder";
