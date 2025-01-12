@@ -90,6 +90,13 @@ const runAction = () => {
 	// Copy "github_token" input variable to "GH_TOKEN" env variable (required by `electron-builder`)
 	setEnv("GH_TOKEN", getInput("github_token", true));
 
+	// Validate publishing credentials
+	if (release) {
+		if (platform === "linux") {
+			run("snapcraft whoami")
+		}
+	}
+
 	// Require code signing certificate and password if building for macOS. Export them to environment
 	// variables (required by `electron-builder`)
 	if (platform === "mac") {
@@ -123,28 +130,12 @@ const runAction = () => {
 		}
 	}
 
-	// if (platform === "linux") {
-	// 	log("Installing wine to build Windows app on Linux…");
-	// 	run("sudo dpkg --add-architecture i386")
-	// 	run("sudo apt-get update")
-	// 	run("sudo apt-get install -y software-properties-common")
-	// 	run("sudo add-apt-repository -y ppa:cybermax-dexter/sdl2-backport")
-	// 	run("sudo apt-get update")
-	// 	run(`sudo apt-get install -y \
-	// 		wine32 \
-	// 		winbind \
-	// 		xvfb`)
-    //     // Verify Wine installation
-	// 	log("Verifying Wine installation…");
-	// 	run("wine --version")
-	// }
-
 	log(`Building${release ? " and releasing" : ""} the Electron app…`);
 	const cmd = useVueCli ? "vue-cli-service electron:build" : "electron-builder";
 	for (let i = 0; i < maxAttempts; i += 1) {
 		try {
 			run(
-				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} -${platform === "mac" ? "m" : "wl"} ${
+				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} ${platform === "mac" ? "-m --universal" : "-wl"} ${
 					release ? "--publish always" : ""
 				} ${args}`,
 				appRoot,
