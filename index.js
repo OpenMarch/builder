@@ -94,7 +94,7 @@ const runAction = () => {
 	if (release) {
 		if (platform === "linux") {
 			log("Platform is linux and release is true. Validating snapcraft credentials...")
-			run("snapcraft whoami")
+			run("snapcraft whoami -q")
 		}
 	}
 
