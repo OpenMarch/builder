@@ -27,6 +27,8 @@ const getPlatform = () => {
 	switch (process.platform) {
 		case "darwin":
 			return "mac";
+		case "win32":
+			return "windows";
 		default:
 			return "linux";
 	}
@@ -136,7 +138,7 @@ const runAction = () => {
 	for (let i = 0; i < maxAttempts; i += 1) {
 		try {
 			run(
-				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} ${platform === "mac" ? "-m --universal" : "-wl"} ${
+				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} --${platform} ${platform === "mac" ? "--universal" : ""} ${
 					release ? "--publish always" : ""
 				} ${args}`,
 				appRoot,
