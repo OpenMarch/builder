@@ -1,5 +1,6 @@
 const { execSync } = require("child_process");
 const { existsSync, readFileSync } = require("fs");
+const { platform } = require("os");
 const { join } = require("path");
 
 /**
@@ -24,10 +25,11 @@ const run = (cmd, cwd) => execSync(cmd, { encoding: "utf8", stdio: "inherit", cw
  * Determines the current operating system (one of ["mac", "windows", "linux"])
  */
 const getPlatform = () => {
+	console.log("PLATFORM", process.platform);
 	switch (process.platform) {
 		case "darwin":
 			return "mac";
-		case "win32":
+		case "windows":
 			return "windows";
 		default:
 			return "linux";
@@ -68,7 +70,6 @@ const runAction = () => {
 	const release = getInput("release", true) === "true";
 	const pkgRoot = getInput("package_root", true);
 	const buildScriptName = getInput("build_script_name", true);
-	const skipBuild = getInput("skip_build") === "true";
 	const useVueCli = getInput("use_vue_cli") === "true";
 	const args = getInput("args") || "";
 	const maxAttempts = Number(getInput("max_attempts") || "1");
@@ -138,7 +139,7 @@ const runAction = () => {
 	for (let i = 0; i < maxAttempts; i += 1) {
 		try {
 			run(
-				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} --${platform} ${platform === "mac" ? "--universal" : ""} ${
+				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} --${platform} ${
 					release ? "--publish always" : ""
 				} ${args}`,
 				appRoot,
