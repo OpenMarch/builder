@@ -72,8 +72,9 @@ const runAction = () => {
 	const pkgRoot = getInput("package_root", true);
 	const buildScriptName = getInput("build_script_name", true);
 	const useVueCli = getInput("use_vue_cli") === "true";
-	const args = getInput("args") || "";
 	const maxAttempts = Number(getInput("max_attempts") || "1");
+	const args = getInput("args") || "";
+	let runtimeArgs = "";
 
 	// TODO: Deprecated option, remove in v2.0. `electron-builder` always requires a `package.json` in
 	// the same directory as the Electron app, so the `package_root` option should be used instead
@@ -131,6 +132,14 @@ const runAction = () => {
 		}
 	}
 
+	if (platform === "mac") {
+		if (process.arch === "x64") {
+			runtimeArgs += "--x64";
+		} else {
+			runtimeArgs += "--arm64";
+		}
+	}
+
 	log(`Building${release ? " and releasing" : ""} the Electron app…`);
 	const cmd = useVueCli ? "vue-cli-service electron:build" : "electron-builder";
 	for (let i = 0; i < maxAttempts; i += 1) {
@@ -138,7 +147,7 @@ const runAction = () => {
 			run(
 				`${useNpm ? "npx --no-install" : "yarn run"} ${cmd} --${platform} ${
 					release ? "--publish always" : ""
-				} ${args}`,
+				} ${args} ${runtimeArgs}`,
 				appRoot,
 			);
 			break;
