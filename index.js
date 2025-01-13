@@ -29,7 +29,7 @@ const getPlatform = () => {
 	switch (process.platform) {
 		case "darwin":
 			return "mac";
-		case "windows":
+		case "win32":
 			return "windows";
 		default:
 			return "linux";
