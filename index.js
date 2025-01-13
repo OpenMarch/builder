@@ -1,6 +1,5 @@
 const { execSync } = require("child_process");
 const { existsSync, readFileSync } = require("fs");
-const { platform } = require("os");
 const { join } = require("path");
 
 /**
@@ -25,7 +24,6 @@ const run = (cmd, cwd) => execSync(cmd, { encoding: "utf8", stdio: "inherit", cw
  * Determines the current operating system (one of ["mac", "windows", "linux"])
  */
 const getPlatform = () => {
-	console.log("PLATFORM", process.platform);
 	switch (process.platform) {
 		case "darwin":
 			return "mac";
@@ -66,6 +64,9 @@ const getInput = (name, required) => {
  * Installs NPM dependencies and builds/releases the Electron app
  */
 const runAction = () => {
+	console.log("PLATFORM:", process.platform);
+	console.log("ARCH:", process.arch);
+
 	const platform = getPlatform();
 	const release = getInput("release", true) === "true";
 	const pkgRoot = getInput("package_root", true);
@@ -114,12 +115,8 @@ const runAction = () => {
 	// Disable console advertisements during install phase
 	setEnv("ADBLOCK", true);
 
-	if (platform === "windows" && skipWindowsNpmInstall) {
-		log("Skipping NPM install because `skip_windows_npm_install` option is set");
-	} else {
-		log(`Installing dependencies using ${useNpm ? "NPM" : "Yarn"}…`);
-		run(useNpm ? "npm install" : "yarn", pkgRoot);
-	}
+	log(`Installing dependencies using ${useNpm ? "NPM" : "Yarn"}…`);
+	run(useNpm ? "npm install" : "yarn", pkgRoot);
 
 	// Run NPM build script if it exists
 	log("Running the build script…");
